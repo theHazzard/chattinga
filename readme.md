@@ -9,8 +9,8 @@ Chattinga!
         appSecret: '...'
       },
       twit: {
-        consumerKey: 'hBERNmk8i49jaYJpA00cQ',
-        consumerSecret: '0cXgorJPGvhhyo0gT5DK4KvXC1tgBrFIhx2NFpqQco'
+        consumerKey: '...',
+        consumerSecret: '...'
       }
     };
     
