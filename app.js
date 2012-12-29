@@ -8,7 +8,40 @@ var express = require('express')
   , user = require('./routes/user')
   , app = express()
   , http = require('http').createServer(app)
-  , path = require('path');
+  , path = require('path')
+  , io = require('socket.io').listen(http)
+  , config = require('./config')
+  , passport = require('passport')
+  , FacebookStrategy = require('passport-facebook').Strategy
+  , TwitterStrategy = require('passport-twitter').Strategy;
+/*
+passport.use(new FacebookStrategy({
+    clientID: FACEBOOK_APP_ID,
+    clientSecret: FACEBOOK_APP_SECRET,
+    callbackURL: "http://www.example.com/auth/facebook/callback"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOrCreate(..., function(err, user) {
+      if (err) { return done(err); }
+      done(null, user);
+    });
+  }
+));
+
+passport.use(new TwitterStrategy({
+    consumerKey: TWITTER_CONSUMER_KEY,
+    consumerSecret: TWITTER_CONSUMER_SECRET,
+    callbackURL: "http://www.example.com/auth/twitter/callback"
+  },
+  function(token, tokenSecret, profile, done) {
+    User.findOrCreate(..., function(err, user) {
+      if (err) { return done(err); }
+      done(null, user);
+    });
+  }
+));
+*/
+console.log(config.twit.consumerKey);
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -30,7 +63,6 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
-app.get('/users', user.list);
 
 http.listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
