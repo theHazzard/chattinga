@@ -2,7 +2,6 @@
 /**
  * Module dependencies.
  */
-
 var express = require('express')
   , routes = require('./routes')
   , user = require('./routes/user')
@@ -13,7 +12,37 @@ var express = require('express')
   , config = require('./config')
   , passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy
-  , TwitterStrategy = require('passport-twitter').Strategy;
+  , TwitterStrategy = require('passport-twitter').Strategy
+  , mongoose = require('mongoose')
+  , Schema = mongoose.Schema;
+
+var UserSchema = new Schema({
+  userName: { type: String, required: true },
+  email: { type: String, required: true },
+  conecciones: [
+    {
+      id: { type: String, unique: true },
+      red: { type: String, required: true },
+      userToken: { type: String, required: true },
+      userTokenSecret: { type: String, required: true },      
+    }
+  ],
+  registrado: Date
+});
+
+UserSchema.static('authenticate', function(id, red, callback) {
+  this.findOne({ authenticationData.id: email }, function(err, user) {
+      if (err) { return callback(err); }
+      if (!user) { return callback(null, false); }
+      user.verifyPassword(password, function(err, passwordCorrect) {
+        if (err) { return callback(err); }
+        if (!passwordCorrect) { return callback(null, false); }
+        return callback(null, user);
+      });
+    });
+});
+//mongoose.connect('mongodb://nodejitsu:ae590d674c8b70d6b05a8ed0177ef389@linus.mongohq.com:10003');
+mongoose.connect('localhost', 'test');
 /*
 passport.use(new FacebookStrategy({
     clientID: FACEBOOK_APP_ID,
