@@ -16,41 +16,64 @@ var express = require('express')
   , mongoose = require('mongoose')
   , Schema = mongoose.Schema;
 
+//mongoose.connect('mongodb://nodejitsu:ae590d674c8b70d6b05a8ed0177ef389@linus.mongohq.com:10003');
+mongoose.connect('localhost', 'test');
+
+
 var UserSchema = new Schema({
   userName: { type: String, required: true },
-  email: { type: String, required: true },
+  email: String,
   conecciones: [
     {
       id: { type: String, unique: true },
       red: { type: String, required: true },
       userToken: { type: String, required: true },
-      userTokenSecret: { type: String, required: true },      
+      userTokenSecret: { type: String, required: true }
     }
   ],
   registrado: Date
 });
 
-UserSchema.static('authenticate', function(id, red, callback) {
-  this.findOne({ authenticationData.id: email }, function(err, user) {
+UserSchema.static('authenticate', function(perfil, red, token, tokensecret, callback) {
+  this.findOne({ 'conecciones.id': perfil.id, 'conecciones.red': red }, function(err, user) {
       if (err) { return callback(err); }
-      if (!user) { return callback(null, false); }
-      user.verifyPassword(password, function(err, passwordCorrect) {
-        if (err) { return callback(err); }
-        if (!passwordCorrect) { return callback(null, false); }
+      if (user === null) {
+        return callback(err, user, red, token, tokensecret);
+      } else {
         return callback(null, user);
-      });
-    });
+      }
+  });
 });
-//mongoose.connect('mongodb://nodejitsu:ae590d674c8b70d6b05a8ed0177ef389@linus.mongohq.com:10003');
-mongoose.connect('localhost', 'test');
+
+
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
 /*
+  User.findOne({'conecciones.id': id}, function(err, user) {
+    done(err, user);
+  });
+
+
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+*/
+});
+
+var User = mongoose.model('User', UserSchema);
+
 passport.use(new FacebookStrategy({
-    clientID: FACEBOOK_APP_ID,
-    clientSecret: FACEBOOK_APP_SECRET,
+    clientID: config.twit.consumerKey,
+    clientSecret: config.twit.consumerSecret,
     callbackURL: "http://www.example.com/auth/facebook/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    User.findOrCreate(..., function(err, user) {
+    User.authenticate(profile, 'fb', accessToken, refreshToken, function(err, user) {
       if (err) { return done(err); }
       done(null, user);
     });
@@ -58,19 +81,45 @@ passport.use(new FacebookStrategy({
 ));
 
 passport.use(new TwitterStrategy({
-    consumerKey: TWITTER_CONSUMER_KEY,
-    consumerSecret: TWITTER_CONSUMER_SECRET,
-    callbackURL: "http://www.example.com/auth/twitter/callback"
+    consumerKey: config.twit.consumerKey,
+    consumerSecret: config.twit.consumerSecret,
+    callbackURL: "http://localhost:3000/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
-    User.findOrCreate(..., function(err, user) {
-      if (err) { return done(err); }
-      done(null, user);
+    User.authenticate(profile, 'tw', token, tokenSecret, function(err, user, red, token, tokensecret) {
+      if (user === null) {
+        var usr = mongoose.model('User', UserSchema);
+        console.log('1');
+        var elId = profile.id.toString();
+        var u = new usr({
+          userName: profile.displayName,
+          email: '',
+          conecciones: [
+            {
+              id: elId,
+              red: red,
+              userToken: token,
+              userTokenSecret: tokensecret
+            }
+          ],
+          registrado: Date.now()
+        });
+        console.log('2');
+        u.save(function(err, user){
+          console.log('enziño');
+          if (err) {
+            return done(null, err);
+          } else {
+            return done(null, user);
+          }
+        });
+     }
+      return done(null, user);
     });
   }
 ));
-*/
-console.log(config.twit.consumerKey);
+
+
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -82,6 +131,8 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(express.cookieParser('your secret here'));
   app.use(express.session());
+  app.use(passport.initialize());
+  app.use(passport.session());
   app.use(app.router);
   app.use(require('stylus').middleware(__dirname + '/public'));
   app.use(express.static(path.join(__dirname, 'public')));
@@ -92,6 +143,10 @@ app.configure('development', function(){
 });
 
 app.get('/', routes.index);
+app.get('/auth/twitter', passport.authenticate('twitter'));
+app.get('/auth/twitter/callback', 
+  passport.authenticate('twitter', { successRedirect: '/',
+                                     failureRedirect: '/error' }));
 
 http.listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
