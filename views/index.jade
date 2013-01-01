@@ -1,7 +1,16 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
-    if user
-      p #{user.userName}
+	h1= title
+	p Welcome to #{title}
+	if user
+		section#container
+			section#chat
+				section#messages sasdsadasd
+				br
+				section#say
+					input
+	else
+		section#conect
+			a(href='/auth/facebook') Login with facebook
+			a(href='/auth/twitter') Login with twitter

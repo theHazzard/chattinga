@@ -1,7 +1,19 @@
 doctype 5
 html
-  head
-    title Chattinga
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+	head
+		title La Previa chat
+		link(rel='stylesheet', href='/stylesheets/normalize.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+		script(src='/js/prefixfree.min.js')
+		script(src='/socket.io/socket.io.js')
+		script(src='/js/skt.js')
+	body
+		header
+			div#titulo La Previa Chat
+			if user
+				div#userdata
+					div#pic 
+						img(src= user.pic)
+					div#Usuario #{user.userName}				
+					a(id= 'logout',href= '/logout') Logout
+		block content

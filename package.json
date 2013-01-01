@@ -1,9 +1,8 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
+  "version": "0.0.1-1",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "start": "node app.js"
   },
   "dependencies": {
     "express": "3.0.4",
@@ -14,5 +13,10 @@
     "passport-facebook": "~0.1.4",
     "passport-twitter": "~0.1.4",
     "mongoose": "~3.5.3"
-  }
+  },
+  "subdomain": "chattinga",
+  "engines": {
+    "node": "0.8.x"
+  },
+  "name": "lpchat"
 }
