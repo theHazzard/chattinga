@@ -113,13 +113,42 @@ io.configure(function (){
 });
 
 io.sockets.on('connection', function (socket) {
-    socket.emit('nuevo',{ data: 'se conectaron!'});
+  Comment.find({})
+  .limit(25)
+  .lean()
+  .exec(function(err,comments){
+    console.log(comments);
+    var result = {};
+    for ( var e in comments )
+    {
+      result = result + {picture: e.pic, nombre: e.userName, mensaje: e.comentario};
+    };
+    socket.emit('history',{ messages: result });
+  });
+  socket.on('mensaje',function(message){
+    console.log(message.m);
+    sessionStore.get(socket.handshake.sessionID, function(err, session) {
+      console.log(session);//.passport.user.userName);
+      var msg = mongoose.model('Comment', CommentSchema);
+      var m = new msg({
+          userId: session.passport.user._id,
+          userName: session.passport.user.userName,
+          pic: session.passport.user.pic,
+          comentario: message.m
+      });
+      m.save(function(err, comment){
+        console.log(comment);
+      });
+      io.sockets.emit('nMensaje',{nombre: session.passport.user.userName, picture: session.passport.user.pic, mensaje: message.m});
+    });
+  });
 });
 
 passport.use(new FacebookStrategy({
     clientID: config.fb.appId,
     clientSecret: config.fb.appSecret,
-    callbackURL: "http://localhost:3000/auth/facebook/callback"
+    //callbackURL: "http://localhost:3000/auth/facebook/callback"
+    callbackURL: "http://chattinga.jit.su/auth/facebook/callback"
   },
   function(accessToken, refreshToken, profile, done) {
       User.authenticate(profile, 'fb', accessToken, refreshToken,
@@ -163,7 +192,8 @@ passport.use(new FacebookStrategy({
 passport.use(new TwitterStrategy({
     consumerKey: config.twit.consumerKey,
     consumerSecret: config.twit.consumerSecret,
-    callbackURL: "http://localhost:3000/auth/twitter/callback"
+    //callbackURL: "http://localhost:3000/auth/twitter/callback"
+    callbackURL: "http://chattinga.jit.su/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
     User.authenticate(profile, 'tw', token, tokenSecret, function(err, user, red, token, tokensecret) {
@@ -229,7 +259,7 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.get('/auth/twitter', passport.authenticate('twitter'));
-app.get('/auth/facebook', passport.authenticate('facebook', {scope: 'user_about_me'}));
+app.get('/auth/facebook', passport.authenticate('facebook'));
 
 app.get('/auth/twitter/callback', 
   passport.authenticate('twitter', { successRedirect: '/',
