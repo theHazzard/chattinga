@@ -48,14 +48,24 @@ header {
   border-color: #e8e9e4;
 }
 #messages {
-  width: 100%;
+  float: left;
+  width: 80%;
   height: 100%;
-  display: inline-block;
   background-color: #edeeea;
+  overflow: auto;
+  overflow-y: auto;
+}
+#conectados {
+  float: right;
+  display: inline-block;
+  width: 20%;
+  height: 100%;
+  background-color: #edeeea;
+  overflow: auto;
+  overflow-y: auto;
 }
 #say {
   width: 100%;
-  display: inline-block;
 }
 input {
   width: 100%;
@@ -63,12 +73,14 @@ input {
 }
 #container {
   text-allign: center;
+  height: 100%;
+  width: 100%;
 }
-.pic {
+.foto {
   display: inline-block;
   width: 3%;
 }
-.pic img {
+.foto img {
   height: 35px;
   width: 35px;
 }

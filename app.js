@@ -21,7 +21,8 @@ var express = require('express')
   , connect = require('connect')
   , parseSignedCookie = connect.utils.parseSignedCookies
   , cookie = require('express/node_modules/cookie')
-  , Session = connect.middleware.session.Session;
+  , Session = connect.middleware.session.Session
+  , conectados = {};
 
 mongoose.connect('mongodb://nodejitsu:ae590d674c8b70d6b05a8ed0177ef389@linus.mongohq.com:10003/nodejitsudb2206317863');
 //mongoose.connect('localhost', 'test');
@@ -119,6 +120,18 @@ io.sockets.on('connection', function (socket) {
   .lean()
   .exec(function(err,comments){
     socket.emit('history',comments);
+  });
+  sessionStore.get(socket.handshake.sessionID, function(err, session) {
+    if (!err){
+      conectados[session.passport.user.userName]= {
+        userName: session.passport.user.userName,
+        pic: session.passport.user.pic
+      };
+      socket.emit('conectados',conectados);
+    }
+  });
+  socket.on('disconnect', function () {
+    io.sockets.emit('user disconnected');
   });
   socket.on('mensaje',function(message){
     console.log(message.m);
