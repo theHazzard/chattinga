@@ -6,9 +6,10 @@ var load = function() {
 		alert(data);
 		for(var c in data)
 		{	
-			console.log(data[c][picture]);
-			//history += '<article class="msg"><section class="pic"><img src="'+ c.picture +'" /></section><section class="nombre">'+c.nombre+'</section><section class="mensaje">'+c.mensaje+'</section></article>'
+			console.log(data[c]);
+			history = '<article class="msg"><section class="pic"><img src="'+ data[c].pic +'" /></section><section class="nombre">'+data[c].userName+'</section><section class="mensaje">'+data[c].comentario+'</section></article>' + history;
 		};
+		$('#messages').append(history);
 	});
 	socket.on('nMensaje',function (data){
 		$('#messages').append('<article class="msg"><section class="pic"><img src="'+ data.picture +'" /></section><section class="nombre">'+data.nombre+'</section><section class="mensaje">'+data.mensaje+'</section></article>');

@@ -115,15 +115,10 @@ io.configure(function (){
 io.sockets.on('connection', function (socket) {
   Comment.find({})
   .limit(25)
+  .sort('-_id')
   .lean()
   .exec(function(err,comments){
-    console.log(comments);
-    var result = {};
-    for ( var e in comments )
-    {
-      result = result + {picture: e.pic, nombre: e.userName, mensaje: e.comentario};
-    };
-    socket.emit('history',{ messages: result });
+    socket.emit('history',comments);
   });
   socket.on('mensaje',function(message){
     console.log(message.m);
